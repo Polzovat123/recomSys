@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
+from src.adapters.db_worker import DBworker
 from src.adapters.json_parse import JSONAdapter
+from src.application.additional_routes.recomendadtion_course.model import Recommendation, RequestRecommendation, \
+    RequestEncodeDescription
 from src.entity.Recomendator import RecommendFasttextEfanna
 
 router = APIRouter(
@@ -14,17 +17,24 @@ async def read_root():
 
 
 @router.post("/encode_course")
-async def recommend_courses(request):
+async def encode_course(request: RequestEncodeDescription):
     try:
         msg = JSONAdapter().parse_request_enc_description(request)
-        enc_msg = RecommendFasttextEfanna.embed_description_course(msg)
+        enc_msg = RecommendFasttextEfanna().embed_description_course(msg)
 
         return {
             "sucsessfull": True,
-            "description": enc_msg
+            "description": list(enc_msg.tolist())
         }
     except BaseException as e:
-        return {
-            "sucsessfull": False,
-            "description": None
-        }
+        return HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/find_best_courses", response_model=Recommendation)
+async def recommend_courses(request: RequestRecommendation):
+    user, size_pool = JSONAdapter.parse_request_recommendation(request)
+
+    preferense_courses = DBworker.get_best_course(user)
+    best_200_course = DBworker.get_course()
+
+
