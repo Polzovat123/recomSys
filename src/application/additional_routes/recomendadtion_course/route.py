@@ -34,7 +34,22 @@ async def encode_course(request: RequestEncodeDescription):
 async def recommend_courses(request: RequestRecommendation):
     user, size_pool = JSONAdapter.parse_request_recommendation(request)
 
-    preferense_courses = DBworker.get_best_course(user)
+    preferense_courses = DBworker.get_best_course(user, get=1)
     best_200_course = DBworker.get_course()
 
+    rkm = RecommendFasttextEfanna()
+
+    try:
+        mean_interest = rkm.get_medium_interest(preferense_courses)
+        recommend_course = []
+        for course in best_200_course:
+            if rkm.is_recommend(course.description, mean_interest):
+                recommend_course.append(course)
+
+        return {
+            "sucsessfull": True,
+            "description": list(recommend_course)
+        }
+    except BaseException as e:
+        return HTTPException(status_code=500, detail=str(e))
 
