@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from src.adapters.api_worker import RequestAdapter
 from src.adapters.db_worker import DBworker
 from src.adapters.json_parse import JSONAdapter
 from src.application.additional_routes.recomendadtion_course.model import Recommendation, RequestRecommendation, \
@@ -27,6 +28,7 @@ async def encode_course(request: RequestEncodeDescription):
             "description": list(enc_msg.tolist())
         }
     except BaseException as e:
+        print(e)
         return HTTPException(status_code=500, detail=str(e))
 
 
@@ -34,8 +36,16 @@ async def encode_course(request: RequestEncodeDescription):
 async def recommend_courses(request: RequestRecommendation):
     user, size_pool = JSONAdapter.parse_request_recommendation(request)
 
-    preferense_courses = DBworker.get_best_course(user, get=1)
-    best_200_course = DBworker.get_course()
+    preferense_courses, _ = JSONAdapter.parse_request_best_course(
+        RequestAdapter().get_best_course(user, get=1)
+    )
+    best_200_course = RequestAdapter.get_course()
+
+    if len(preferense_courses) < 1 or len(best_200_course) < 1:
+        return {
+            "sucsessfull": False,
+            "description": 'small option'
+        }
 
     rkm = RecommendFasttextEfanna()
 

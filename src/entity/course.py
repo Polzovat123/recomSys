@@ -4,5 +4,6 @@ from pydantic import BaseModel
 
 
 class Course(BaseModel):
-    description: str
-    score: List[int]
+    # description: str
+    # name: str
+    embedding: List[float]
