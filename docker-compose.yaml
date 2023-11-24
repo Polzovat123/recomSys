@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  recomendadtion_system:
+    build: .
+    ports:
+      - "2309:2309"
