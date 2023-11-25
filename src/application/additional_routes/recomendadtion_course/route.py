@@ -1,3 +1,4 @@
+import numpy as np
 from fastapi import APIRouter, HTTPException
 
 from src.adapters.api_worker import RequestAdapter
@@ -29,7 +30,13 @@ async def encode_course(request: RequestEncodeDescription):
         }
     except BaseException as e:
         print(e)
-        return HTTPException(status_code=500, detail=str(e))
+        try:
+            return {
+                "sucsessfull": False,
+                "description": list(np.linspace(-1, 1, 300).tolist())
+            }
+        except Exception as e:
+            return HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/find_best_courses", response_model=Recommendation)

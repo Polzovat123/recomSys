@@ -27,3 +27,20 @@ class JSONAdapter:
             ids.append(id)
 
         return best_course, ids
+
+    @staticmethod
+    def parse_request_tags_description(json_request):
+        description_raw = json_request.description
+        tags = json_request.tags
+
+        ans_tag = []
+        for tag in tags:
+            id = tag.id
+            name = tag.name
+            ans_tag.append((id, name))
+        return description_raw, ans_tag
+
+
+    @staticmethod
+    def parse_request_make_test(json_request):
+        return json_request.task
